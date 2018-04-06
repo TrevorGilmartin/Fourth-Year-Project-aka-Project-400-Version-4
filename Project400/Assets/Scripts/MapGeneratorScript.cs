@@ -107,7 +107,7 @@ public class MapGeneratorScript : MonoBehaviour, IQPathWorldScript
 
                 GameObject hex_go = Instantiate(hexPrefab, h.Position(), Quaternion.identity, this.transform);
 
-                if (h == GetHexAt(3, 4) || h == GetHexAt(4, 3) || h == GetHexAt(5, 2))
+                if (h == GetHexAt(3, 4) || h == GetHexAt(4, 3) || h == GetHexAt(5, 2) || h == GetHexAt(15, 16) || h == GetHexAt(14, 17) || h == GetHexAt(13, 18) || h == GetHexAt(12, 19))
                 {
                     h.movementCost = -99;
                     hex_go.GetComponentInChildren<MeshRenderer>().material.color = Color.black;

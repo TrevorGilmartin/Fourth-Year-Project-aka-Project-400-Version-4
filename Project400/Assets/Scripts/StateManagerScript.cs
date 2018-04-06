@@ -39,6 +39,20 @@ public class StateManagerScript : MonoBehaviour
     private List<int> rows;
     private List<int> columns;
 
+    private float coordinatesX1;
+    private float coordinatesX2;
+    private float coordinatesY1;
+    private float coordinatesY2;
+
+    private float xCoordinatesDifference;
+    private float yCoordinatesDifference;
+
+    private float totalResult;
+    private float squaredResult;
+    public HexScript selectedHex;
+
+    public float shortestSquareResult;
+
     AIUnitScript[] PlayerAIs;
 
     public int numberOfPlayers = 2;
@@ -58,7 +72,9 @@ public class StateManagerScript : MonoBehaviour
         //{
         //    PlayerAIs[1] = new AIUnitScript_UtilityAI();
         //}
-#endregion
+        #endregion
+        shortestSquareResult = 0;
+
         currentTurnState = TurnsState.PlayerTurn;
         currentState = States.WaitingForTurn;
 
@@ -134,24 +150,70 @@ public class StateManagerScript : MonoBehaviour
 
         GameObject tempHex_go = GameObject.Find("Hex_" + selectedPlayerUnit.Hex.C + "_" + selectedPlayerUnit.Hex.R);
 
+        #region Attempt1_Of_AI_Movement
+        //foreach (HexScript hex in hexes)
+        //{
+        //    if (!columns.Contains(hex.C))
+        //    {
+        //        columns.Add(hex.C);
+        //    }
+
+        //    if (!rows.Contains(hex.R))
+        //    {
+        //        rows.Add(hex.R);
+        //    }
+        //}
+
+        //int closestRow = rows.OrderBy(item => Math.Abs(selectedPlayerUnit.Hex.R - item)).First();
+        //int closestColumn = columns.OrderBy(item => Math.Abs(selectedPlayerUnit.Hex.C - item)).First();
+
+        //selectedHexColumnPositioningDifference = closestColumn - selectedAIUnit.Hex.C;
+        //selectedHexRowPositioningDifference = closestRow - selectedAIUnit.Hex.R;
+        #endregion
+
         foreach (HexScript hex in hexes)
         {
-            if (!columns.Contains(hex.C))
+            //private float coordinatesX1;
+            // private float coordinatesX2;
+            // private float coordinatesY1;
+            // private float coordinatesY2;
+
+            // private float xCoordinatesDifference;
+            // private float yCoordinatesDifference;
+
+            // private float totalResult;
+            // private float squaredResult;
+
+            coordinatesX1 = hex.C;
+            coordinatesX2 = selectedPlayerUnit.Hex.C;
+
+            coordinatesY1 = hex.R;
+            coordinatesY2 = selectedPlayerUnit.Hex.R;
+
+            xCoordinatesDifference = (coordinatesX2 - coordinatesX1);
+            yCoordinatesDifference = (coordinatesY2 - coordinatesY1);
+            xCoordinatesDifference *= xCoordinatesDifference;
+            yCoordinatesDifference *= yCoordinatesDifference;
+
+            totalResult = (xCoordinatesDifference + yCoordinatesDifference);
+
+            squaredResult = Mathf.Sqrt(totalResult);
+
+            if (shortestSquareResult == 0)
             {
-                columns.Add(hex.C);
+                shortestSquareResult = squaredResult;
+                selectedHex = hex;
             }
 
-            if (!rows.Contains(hex.R))
+            if (shortestSquareResult > squaredResult)
             {
-                rows.Add(hex.R);
+                shortestSquareResult = squaredResult;
+                selectedHex = hex;
             }
         }
 
-        int closestRow = rows.OrderBy(item => Math.Abs(selectedPlayerUnit.Hex.R - item)).First();
-        int closestColumn = columns.OrderBy(item => Math.Abs(selectedPlayerUnit.Hex.C - item)).First();
-
-        selectedHexColumnPositioningDifference = closestColumn - selectedAIUnit.Hex.C;
-        selectedHexRowPositioningDifference = closestRow - selectedAIUnit.Hex.R;
+        selectedHexColumnPositioningDifference = selectedHex.C - selectedAIUnit.Hex.C;
+        selectedHexRowPositioningDifference = selectedHex.R - selectedAIUnit.Hex.R;
 
         selectedAIUnit.DUMMY_PATHING_FUNCTION();
 
