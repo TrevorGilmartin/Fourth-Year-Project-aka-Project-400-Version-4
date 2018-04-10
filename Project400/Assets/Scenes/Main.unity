@@ -749,11 +749,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a316a6f1073672e4497cf87e90c9a818, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyHealth: 0
+  goodness: 0
   currentTurnState: 0
   currentState: 1
   selectedHexes: []
   selectedHexColumnPositioningDifference: 0
   selectedHexRowPositioningDifference: 0
+  shortestSquareResult: 0
+  endTurnDelay: 0
   numberOfPlayers: 2
   currentPlayerID: 0
   aiTurn: 0
@@ -1777,7 +1781,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1022022896}
-        m_MethodName: Update_UnitMovementPath
+        m_MethodName: ActivateAttackActionTheFirst
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -26,9 +26,10 @@ public class UnitViewScript : MonoBehaviour
         Debug.LogError(Name);
     }
 
-    public void RecieveNumber(int number)
+    public void ReceiveNumber(int number)
     {
         Number = number;
+        Debug.LogError(Number);
     }
 
     public void OnUnitMoved(HexScript oldHex, HexScript newHex)

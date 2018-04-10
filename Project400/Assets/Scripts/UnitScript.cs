@@ -70,7 +70,7 @@ public class UnitScript : IQPathUnitScript
             HexScript.CostEstimate
         );
 
-        Debug.LogError("Got pathfinding path of length: " + pathHexes.Length);
+        //Debug.LogError("Got pathfinding path of length: " + pathHexes.Length);
 
         MouseManagerScript.instance.PathCount(pathHexes.Length);
 

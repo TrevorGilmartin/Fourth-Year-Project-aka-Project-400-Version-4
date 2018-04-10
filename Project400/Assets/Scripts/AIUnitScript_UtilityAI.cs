@@ -13,7 +13,7 @@ public class AIUnitScript_UtilityAI : AIUnitScript
 
         foreach (var aiUnit in MapGeneratorScript.instance.aiUnits)
         {
-            if (aiUnit.enemyNumber == 0)
+            //if (aiUnit.enemyNumber == 0)
                 selectedUnit = aiUnit;
         }
     }

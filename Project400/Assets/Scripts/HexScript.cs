@@ -15,7 +15,7 @@ public class HexScript : IQPathTileScript
     static readonly float WIDTH_MULTIPLIER = Mathf.Sqrt(3) / 2;
 
     HashSet<UnitScript> units;
-    HashSet<AIUnitScript> aiUnits;
+    List<AIUnitScript> aiUnits;
 
     public int movementCost;
 
@@ -123,7 +123,7 @@ public class HexScript : IQPathTileScript
     {
         if (aiUnits == null)
         {
-            aiUnits = new HashSet<AIUnitScript>();
+            aiUnits = new List<AIUnitScript>();
         }
 
         aiUnits.Add(aiUnit);

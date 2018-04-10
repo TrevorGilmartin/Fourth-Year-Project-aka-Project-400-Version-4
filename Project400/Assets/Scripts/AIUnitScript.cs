@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class AIUnitScript : IQPathUnitScript
 {
-
     public string name = "AIPlumber";
     public int enemyNumber = 0;
     public int HitPoints = 100;
@@ -109,7 +108,7 @@ public class AIUnitScript : IQPathUnitScript
             HexScript.CostEstimate
         );
 
-        Debug.Log("Got pathfinding path of length: " + pathHexes.Length);
+        //Debug.Log("Got pathfinding path of length: " + pathHexes.Length);
 
         MouseManagerScript.instance.PathCount(pathHexes.Length);
 

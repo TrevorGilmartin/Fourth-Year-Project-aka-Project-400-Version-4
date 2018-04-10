@@ -48,6 +48,12 @@ public class MouseManagerScript : MonoBehaviour
     private bool firstTime = true;
     private bool firstTimeSettingHexPath = true;
 
+    //Attack Action The First Variables
+    private HexScript[] attackingHexes;
+    private bool attackTheFirstInitiated = false;
+    private List<GameObject> selectedAttackingHexes = new List<GameObject>();
+    private bool attackable = false;
+
     // Use this for initialization
     void Start()
     {
@@ -83,6 +89,7 @@ public class MouseManagerScript : MonoBehaviour
             {
                 Update_HexSelection();
                 Update_UnitMovement();
+                Update_PlayerAttackActionTheFirst();
                 LastMousePosition = Input.mousePosition;
 
                 if (pathBegun)
@@ -95,6 +102,7 @@ public class MouseManagerScript : MonoBehaviour
             {
                 Update_SelfHexSelection();
                 Update_UnitMovement();
+                Update_PlayerAttackActionTheFirst();
                 LastMousePosition = Input.mousePosition;
 
                 if (pathBegun)
@@ -329,6 +337,7 @@ public class MouseManagerScript : MonoBehaviour
                 {
                     CanvasManagerScript._instance.Deactivation();
                     canvasActivated = false;
+                    movementActivated = false;
 
                     #region original code for unselection
                     //foreach (var unit in MapGeneratorScript.instance.units)
@@ -440,6 +449,7 @@ public class MouseManagerScript : MonoBehaviour
                         else if (Input.GetKeyDown(KeyCode.Escape))
                         {
                             potentialSelectedHexCashe_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = potentialSelectedHexOriginalColour;
+
                         }
                     }
                 }
@@ -556,6 +566,9 @@ public class MouseManagerScript : MonoBehaviour
     {
         if (StateManagerScript.instance.currentTurnState == TurnsState.PlayerTurn)
         {
+            attackTheFirstInitiated = false;
+            attackable = false;
+
             if (!selfHexSelectionInitiated)
             {
                 if (potentialHexSelected)
@@ -607,6 +620,106 @@ public class MouseManagerScript : MonoBehaviour
         }
     }
 
+    public void Update_PlayerAttackActionTheFirst()
+    {
+        if (!attackTheFirstInitiated)
+        {
+            if (attackingHexes != null)
+            {
+                foreach (var hex in selectedAttackingHexes)
+                {
+                    hex.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = Color.yellow;
+                }
+            }
+        }
+
+        if (canvasActivated && attackTheFirstInitiated)
+        {
+            #region Setting the parameters aka range in which on can attack 
+            GameObject tempHex_go = GameObject.Find("Hex_" + selectedUnit.Hex.C + "_" + selectedUnit.Hex.R);
+
+            attackingHexes = selectedUnit.Hex.GetNeighbours(tempHex_go, 1, MapGeneratorScript.instance.numColumns, MapGeneratorScript.instance.numRows);
+
+            foreach (HexScript hex in attackingHexes)
+            {
+                GameObject tempHexNeighbour_go = GameObject.Find("Hex_" + hex.C + "_" + hex.R);
+                if (hex.movementCost == 1)
+                {
+                    tempHexNeighbour_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
+                    if (!selectedAttackingHexes.Contains(tempHexNeighbour_go) || selectedAttackingHexes == null)
+                    {
+                        selectedAttackingHexes.Add(tempHexNeighbour_go);
+                    }
+                }
+            }
+            tempHex_go.GetComponentInChildren<MeshRenderer>().material.color = Color.yellow;
+            #endregion
+
+            #region Is Something Attackable
+            foreach (var aiUnit in MapGeneratorScript.instance.aiUnits)
+            {
+                foreach (var hex in attackingHexes)
+                {
+                    if (aiUnit.Hex == hex)
+                    {
+                        GameObject tempHexPotenitalAttackie_go = GameObject.Find("Hex_" + hex.C + "_" + hex.R);
+                        tempHexPotenitalAttackie_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = Color.cyan;
+                        attackable = true;
+                    }
+                }
+            }
+            #endregion
+            RaycastHit hitInfo;
+
+            //Sends a ray from the centre of the camera to the point sent into the function and continues 
+            //in that direction
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            //Checks to see if the ray has hit an object
+            //Fills out the hitInfo class as to tell you what collider you hit
+            if (Physics.Raycast(ray, out hitInfo))
+            {
+                //This is in reference to the Hextile which is inside the GameObject HexTile_0_0
+                GameObject currentHitModelObject = hitInfo.collider.transform.gameObject;
+                //This is in reference to the Hextiles parent which is HexTile_0_0
+                GameObject currentHitParentObject = hitInfo.collider.transform.parent.gameObject;
+
+                //hitInfo.collider.transform.parent.name is done so it gets the name of the object
+                //my parnet of my model which was an empty gameobject created so at all times it would be centred
+                //Debug.Log("Raycast hit: " + hitInfo.collider.transform.parent.name);
+                //Debug.Log("Raycast hit: " + currentHitModelObject.name);
+
+                #region Notes/Thoughts
+                //We know what we're mousing over.
+                //What if we wanted to show a tooltip or have an
+                //action occur
+
+                //WE could could check to see if we're clicking
+                #endregion
+                //MeshRenderer mr = currentHitModelObject.GetComponentInChildren<MeshRenderer>();
+                //Color originalColor = mr.material.color;
+
+                #region attemptToGetCharacter
+                GameObject tempHex_GoCharacter = GameObject.Find("group2");
+                #endregion
+                //Debug.LogError(currentHitModelObject.GetComponentInParent<UnitViewScript>().Name);
+                if (Input.GetMouseButtonDown(0) && hitInfo.collider.transform.parent.name == tempHex_GoCharacter.name.ToString() && currentHitModelObject.GetComponentInParent<UnitViewScript>().Name == "AIAggressivePlumber")
+                {
+                    foreach (var aiUnit in MapGeneratorScript.instance.aiUnits)
+                    {
+                        foreach (var hex in attackingHexes)
+                        {
+                            if (aiUnit.Hex == hex)
+                            {
+                                aiUnit.HitPoints -= 20;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     #region Helpers
     Vector3 MouseToGroundPlane(Vector3 mousePos)
     {
@@ -641,10 +754,16 @@ public class MouseManagerScript : MonoBehaviour
         pathCount = count;
     }
 
+    public void ActivateAttackActionTheFirst()
+    {
+        attackTheFirstInitiated = true;
+    }
+
     public void EndTurn()
     {
         CanvasManagerScript._instance.Deactivation();
         canvasActivated = false;
+        movementActivated = false;
 
         #region original code for unselection
         //foreach (var unit in MapGeneratorScript.instance.units)
