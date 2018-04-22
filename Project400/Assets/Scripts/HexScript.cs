@@ -10,6 +10,8 @@ public class HexScript : IQPathTileScript
     public int R; //Row
     public int S;
 
+    public Vector3 worldPosition;
+
     bool isBlocked;
 
     static readonly float WIDTH_MULTIPLIER = Mathf.Sqrt(3) / 2;

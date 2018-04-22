@@ -92,7 +92,7 @@ public class MouseManagerScript : MonoBehaviour
                 Update_PlayerAttackActionTheFirst();
                 LastMousePosition = Input.mousePosition;
 
-                if (pathBegun)
+                if (pathBegun && selectedUnit.MovementRemaining >= 0)
                     movementDelay += Time.deltaTime;
 
                 if (movementDelay > 1f)
@@ -435,6 +435,7 @@ public class MouseManagerScript : MonoBehaviour
                                     potentialSelectedHexOriginalColour = potentialHexSelection_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color;
                                     potentialHexSelection_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = Color.blue;
                                     potentialSelectedHexCashe_go = potentialHexSelection_go;
+                                    PotentialEnergyDifference();            
                                 }
                                 else
                                 {
@@ -442,6 +443,7 @@ public class MouseManagerScript : MonoBehaviour
                                     potentialHexSelection_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = Color.blue;
                                     potentialSelectedHexCashe_go = potentialHexSelection_go;
                                     potentialHexSelected = true;
+                                    PotentialEnergyDifference();
                                 }
                             }
                             Debug.Log("It Works");
@@ -449,12 +451,19 @@ public class MouseManagerScript : MonoBehaviour
                         else if (Input.GetKeyDown(KeyCode.Escape))
                         {
                             potentialSelectedHexCashe_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = potentialSelectedHexOriginalColour;
-
                         }
                     }
                 }
             }
         }
+    }
+
+    public void PotentialEnergyDifference()
+    {
+        selectedHexColumnPositioningDifference = potentalSelectedHexColumnPosition - selectedUnit.Hex.C;
+        selectedHexRowPositioningDifference = potentalSelectedHexRowPosition - selectedUnit.Hex.R;
+
+        selectedUnit.PotentialEnergyUsage();
     }
 
     void Update_SelfHexSelection()
@@ -564,7 +573,7 @@ public class MouseManagerScript : MonoBehaviour
 
     public void Update_UnitMovementPath()
     {
-        if (StateManagerScript.instance.currentTurnState == TurnsState.PlayerTurn)
+        if (StateManagerScript.instance.currentTurnState == TurnsState.PlayerTurn && selectedUnit.MovementRemaining >= 0)
         {
             attackTheFirstInitiated = false;
             attackable = false;
@@ -591,7 +600,7 @@ public class MouseManagerScript : MonoBehaviour
 
     public void Update_UnitMovement()
     {
-        if (StateManagerScript.instance.currentTurnState == TurnsState.PlayerTurn)
+        if (StateManagerScript.instance.currentTurnState == TurnsState.PlayerTurn && selectedUnit.MovementRemaining >= 0)
         {
             if (!selfHexSelectionInitiated)
             {
@@ -702,7 +711,7 @@ public class MouseManagerScript : MonoBehaviour
                 #region attemptToGetCharacter
                 GameObject tempHex_GoCharacter = GameObject.Find("group2");
                 #endregion
-                //Debug.LogError(currentHitModelObject.GetComponentInParent<UnitViewScript>().Name);
+                Debug.LogError(currentHitModelObject.GetComponentInParent<UnitViewScript>().Name);
                 if (Input.GetMouseButtonDown(0) && hitInfo.collider.transform.parent.name == tempHex_GoCharacter.name.ToString() && currentHitModelObject.GetComponentInParent<UnitViewScript>().Name == "AIAggressivePlumber")
                 {
                     foreach (var aiUnit in MapGeneratorScript.instance.aiUnits)

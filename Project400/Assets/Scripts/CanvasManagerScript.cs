@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CanvasManagerScript : MonoBehaviour {
 
     public GameObject actionPanel;
+    public GameObject enengyTextPanel;
+    public Text energyText;
 
     #region Singleton
     public static CanvasManagerScript _instance;
@@ -30,10 +33,17 @@ public class CanvasManagerScript : MonoBehaviour {
     public void Activation()
     {
         actionPanel.SetActive(true);
+        enengyTextPanel.SetActive(true);
     }
 
     public void Deactivation()
     {
         actionPanel.SetActive(false);
+        enengyTextPanel.SetActive(false);
+    }
+
+    public void DisplayEnergyUsage(int PotentialEnergyUsage, int TotalUsableEnergy)
+    {
+        energyText.text = PotentialEnergyUsage + " out of " + TotalUsableEnergy;
     }
 }

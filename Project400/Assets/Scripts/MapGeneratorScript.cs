@@ -101,15 +101,19 @@ public class MapGeneratorScript : MonoBehaviour, IQPathWorldScript
         SpawnUnitAt(unit, unitPlumberPrefab, 10, 10);
         AIUnitScript aiUnit = new AIUnitScript();
         AIUnitScript aiUnit2 = new AIUnitScript();
+        AIUnitScript aiUnit3 = new AIUnitScript();
         SpawnAIUnitAt(aiUnit, unitPlumberPrefab, 17, 17);
         currentAICreation = AIEnemyCreation.AIEnemyTheSecond;
         SpawnAIUnitAt(aiUnit2, unitPlumberPrefab, 2, 17);
-        //SpawnAIUnitAt(aiUnit, unitPlumberPrefab, 17, 2);
+        currentAICreation = AIEnemyCreation.AIEnemyTheThird;
+        SpawnAIUnitAt(aiUnit3, unitPlumberPrefab, 17, 2);
 
         foreach (var item in aiUnits)
         {
             Debug.LogError(item);
         }
+
+        //Debug.LogError(-Mathf.Infinity);
     }
 
     public void GenerateMap()
@@ -166,7 +170,7 @@ public class MapGeneratorScript : MonoBehaviour, IQPathWorldScript
                 hex_go.GetComponent<HexComponentScript>().hex = new HexScript(this, column, row);
                 hex_go.GetComponent<HexComponentScript>().map = this;
 
-                hex_go.GetComponentInChildren<TextMesh>().text = string.Format("{0},{1}\n\t{2}", column, row, h.movementCost);
+                //hex_go.GetComponentInChildren<TextMesh>().text = string.Format("{0},{1}\n\t{2}", column, row, h.movementCost);
 
                 hex_go.transform.localScale = Vector3.one * (1 - outlinePercent);
 
@@ -265,8 +269,8 @@ public class MapGeneratorScript : MonoBehaviour, IQPathWorldScript
             aiUnitTheFirst.SetName();
             aiUnitTheFirst.enemyNumber = 1;
             aiUnitTheFirst.SetNumber();
-       
-            aiUnits.Insert(enemyCount,aiUnitTheFirst);
+
+            aiUnits.Insert(enemyCount, aiUnitTheFirst);
             //aiUnitGameObjects.Add(unitPlumber_go);
 
             aiUnitToGameObjectMapList.Add(unitPlumberTheFirst_go);
@@ -292,10 +296,10 @@ public class MapGeneratorScript : MonoBehaviour, IQPathWorldScript
             aiUnitTheSecond.enemyNumber = 2;
             aiUnitTheSecond.SetNumber();
 
-            
+
             aiUnits.Insert(enemyCount, aiUnitTheSecond);
             //aiUnitGameObjects.Add(unitPlumber_go);
-          
+
             aiUnitToGameObjectMapList.Add(unitPlumberTheSecond_go);
             //aiUnitToGameObjectMap.Add(aiUnitTheSecond, unitPlumberTheSecond_go);
 
@@ -305,29 +309,33 @@ public class MapGeneratorScript : MonoBehaviour, IQPathWorldScript
 
         if (currentAICreation == AIEnemyCreation.AIEnemyTheThird)
         {
-            GameObject myHex_go = hexToGameObjectMap[GetHexAt(q, r)];
-            aiUnit.SetHex(GetHexAt(q, r));
-            GameObject unitPlumberTheThird_go = (GameObject)Instantiate(prefab, new Vector3(myHex_go.transform.position.x, 1, myHex_go.transform.position.z), Quaternion.identity, myHex_go.transform);
-            aiUnit.OnUnitMoved += unitPlumberTheThird_go.GetComponent<UnitViewScript>().OnUnitMoved;
-            aiUnit.ReceivedName += unitPlumberTheThird_go.GetComponent<UnitViewScript>().ReceiveName;
-            aiUnit.ReceivedNumber += unitPlumberTheThird_go.GetComponent<UnitViewScript>().ReceiveNumber;
-            aiUnit.name = "AIDesperatePlumber";
-            aiUnit.SetName();
-            aiUnit.enemyNumber = 3;
-            aiUnit.SetNumber();
+            if (currentAICreation == AIEnemyCreation.AIEnemyTheThird)
+            {
+                AIUnitScript aiUnitTheThird = aiUnit;
+                GameObject myHex_go = hexToGameObjectMap[GetHexAt(q, r)];
+                aiUnitTheThird.SetHex(GetHexAt(q, r));
+                GameObject unitPlumberTheFirst_go = (GameObject)Instantiate(prefab, new Vector3(myHex_go.transform.position.x, 1, myHex_go.transform.position.z), Quaternion.identity, myHex_go.transform);
+                aiUnitTheThird.OnUnitMoved += unitPlumberTheFirst_go.GetComponent<UnitViewScript>().OnUnitMoved;
+                aiUnitTheThird.ReceivedName += unitPlumberTheFirst_go.GetComponent<UnitViewScript>().ReceiveName;
+                aiUnitTheThird.ReceivedNumber += unitPlumberTheFirst_go.GetComponent<UnitViewScript>().ReceiveNumber;
+                aiUnitTheThird.name = "AIDesperatePlumber";
+                aiUnitTheThird.SetName();
+                aiUnitTheThird.enemyNumber = 3;
+                aiUnitTheThird.SetNumber();
 
-            aiUnits.Add(aiUnit);
-            //aiUnitGameObjects.Add(unitPlumber_go);
+                aiUnits.Insert(enemyCount, aiUnitTheThird);
+                //aiUnitGameObjects.Add(unitPlumber_go);
 
-            AIUnitScript aiUnitTheThird = aiUnit;
-            aiUnitToGameObjectMapList.Add(unitPlumberTheThird_go);
-            //aiUnitToGameObjectMap.Add(aiUnitTheThird, unitPlumberTheThird_go);
+                aiUnitToGameObjectMapList.Add(unitPlumberTheFirst_go);
+                //aiUnitToGameObjectMap.Add(aiUnitTheFirst, unitPlumberTheFirst_go);
 
-            currentAICreation = AIEnemyCreation.Stalling;
+                enemyCount++;
+                currentAICreation = AIEnemyCreation.Stalling;
+            }
         }
 
         if (currentAICreation == AIEnemyCreation.AIEnemyTheFourth)
-        { 
+        {
             GameObject myHex_go = hexToGameObjectMap[GetHexAt(q, r)];
             aiUnit.SetHex(GetHexAt(q, r));
             GameObject unitPlumberTheFourth_go = (GameObject)Instantiate(prefab, new Vector3(myHex_go.transform.position.x, 1, myHex_go.transform.position.z), Quaternion.identity, myHex_go.transform);
@@ -370,7 +378,7 @@ public class MapGeneratorScript : MonoBehaviour, IQPathWorldScript
 
         //aiUnits.Add(aiUnit);
         //aiUnitToGameObjectMapList.Add(unitPlumber_go);
-#endregion
+        #endregion
     }
 
 

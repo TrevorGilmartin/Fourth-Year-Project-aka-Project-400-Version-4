@@ -87,7 +87,7 @@ public class StateManagerScript : MonoBehaviour
         //    PlayerAIs[1] = new AIUnitScript_UtilityAI();
         //}
         #endregion
-        goodness = 50f;
+        goodness = -Mathf.Infinity;
         enemyHealth = 150f;
         overrideGoodness = false;
         defenceTurnCounter = 0;
@@ -204,6 +204,22 @@ public class StateManagerScript : MonoBehaviour
                 }
             }
         }
+        if (currentTurnState == TurnsState.EnemyTurn_3)
+        {
+            foreach (var aiUnit in MapGeneratorScript.instance.aiUnits)
+            {
+                List<GameObject> potentialCharacters = MapGeneratorScript.instance.aiUnitToGameObjectMapList;
+                foreach (GameObject character in potentialCharacters)
+                {
+                    if (character.GetComponent<UnitViewScript>().Number == aiUnit.enemyNumber && aiUnit.enemyNumber == 3)
+                    {
+                        selectedAIUnit = aiUnit;
+                        currentState = States.SelectedAIUnitCharacter;
+                        Debug.LogError(selectedAIUnit.enemyNumber);
+                    }
+                }
+            }
+        }
     }
 
     private void DoMoveableRangeDiscovery()
@@ -239,6 +255,7 @@ public class StateManagerScript : MonoBehaviour
 
         GameObject tempHex_go = GameObject.Find("Hex_" + selectedPlayerUnit.Hex.C + "_" + selectedPlayerUnit.Hex.R);
 
+
         #region Attempt1_Of_AI_Movement
         //foreach (HexScript hex in hexes)
         //{
@@ -262,46 +279,61 @@ public class StateManagerScript : MonoBehaviour
 
         if (goodness > 35)
         {
-            foreach (HexScript hex in hexes)
+            foreach (HexScript hex in hexes)//Potential Selectable Hexes for the Current Enemy
             {
-                coordinatesX1 = hex.C;
-                coordinatesX2 = selectedPlayerUnit.Hex.C;
-
-                coordinatesY1 = hex.R;
-                coordinatesY2 = selectedPlayerUnit.Hex.R;
-
-                xCoordinatesDifference = (coordinatesX2 - coordinatesX1);
-                yCoordinatesDifference = (coordinatesY2 - coordinatesY1);
-                xCoordinatesDifference *= xCoordinatesDifference;
-                yCoordinatesDifference *= yCoordinatesDifference;
-
-                totalResult = (xCoordinatesDifference + yCoordinatesDifference);
-
-                squaredResult = Mathf.Sqrt(totalResult);
-
-                if (shortestSquareResult == 0)
+                HexScript Found = null;
+                foreach (var unit in MapGeneratorScript.instance.aiUnits) //Collection of enemy players
                 {
-                    shortestSquareResult = squaredResult;
-                    selectedHex = hex;
+                    if (unit.Hex == hex)
+                    {
+                        Found = unit.Hex;
+                        Debug.LogError("The Current: R=" + unit.Hex.R + " C=" + unit.Hex.C);
+                    }
                 }
 
-                if (shortestSquareResult > squaredResult)
+                if (Found == null)
                 {
-                    shortestSquareResult = squaredResult;
-                    selectedHex = hex;
+                    coordinatesX1 = hex.C;
+                    coordinatesX2 = selectedPlayerUnit.Hex.C;
+
+                    coordinatesY1 = hex.R;
+                    coordinatesY2 = selectedPlayerUnit.Hex.R;
+
+                    xCoordinatesDifference = (coordinatesX2 - coordinatesX1);
+                    yCoordinatesDifference = (coordinatesY2 - coordinatesY1);
+                    xCoordinatesDifference *= xCoordinatesDifference;
+                    yCoordinatesDifference *= yCoordinatesDifference;
+
+                    totalResult = (xCoordinatesDifference + yCoordinatesDifference);
+
+                    squaredResult = Mathf.Sqrt(totalResult);
+
+                    if (shortestSquareResult == 0)
+                    {
+                        shortestSquareResult = squaredResult;
+                        selectedHex = hex;
+                    }
+
+                    if (shortestSquareResult > squaredResult)
+                    {
+                        shortestSquareResult = squaredResult;
+                        selectedHex = hex;
+                    }
                 }
+
             }
-
-            selectedHexColumnPositioningDifference = selectedHex.C - selectedAIUnit.Hex.C;
-            selectedHexRowPositioningDifference = selectedHex.R - selectedAIUnit.Hex.R;
-
-            selectedAIUnit.DUMMY_PATHING_FUNCTION();
-
-            movementActivated = true;
-            pathBegun = false;
-
-            currentState = States.InitiatingPotentialMovement;
         }
+
+        selectedHexColumnPositioningDifference = selectedHex.C - selectedAIUnit.Hex.C;
+        selectedHexRowPositioningDifference = selectedHex.R - selectedAIUnit.Hex.R;
+
+        selectedAIUnit.DUMMY_PATHING_FUNCTION();
+
+        movementActivated = true;
+        pathBegun = false;
+
+        currentState = States.InitiatingPotentialMovement;
+
 
         if (goodness < 35)
         {
@@ -406,6 +438,13 @@ public class StateManagerScript : MonoBehaviour
             aiTurn = true;
             endTurnTrue = false;
         }
+        else if (currentTurnState == TurnsState.EnemyTurn_2 && MapGeneratorScript.instance.aiUnits.Count > 2)
+        {
+            currentTurnState = TurnsState.EnemyTurn_3;
+            currentState = States.Stalling;
+            aiTurn = true;
+            endTurnTrue = false;
+        }
         else
         {
             currentTurnState = TurnsState.PlayerTurn;
@@ -419,9 +458,12 @@ public class StateManagerScript : MonoBehaviour
         List<GameObject> charactersToDestroy = MapGeneratorScript.instance.aiUnitToGameObjectMapList;
         foreach (GameObject character in characterToDestroy)
         {
-            if (character.GetComponent<UnitViewScript>().Number == selectedAIUnit.enemyNumber)
+            foreach (var aiUnit in MapGeneratorScript.instance.aiUnits)
             {
-                Destroy(character);
+                if (aiUnit.enemyNumber == character.GetComponent<UnitViewScript>().Number && aiUnit.HitPoints <= 0)
+                {
+                    Destroy(character);
+                }
             }
         }
     }
