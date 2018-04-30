@@ -71,30 +71,6 @@ public class UnitScript : IQPathUnitScript
         );
 
         //Debug.LogError("Got pathfinding path of length: " + pathHexes.Length);
-        string test = "Got pathfinding path of movmentValue: ";
-        int testInt = 0;
-        int count = 0;
-
-        foreach (var hex in pathHexes)
-        {
-            if (count == 0)
-            {
-                count++;
-            }
-            else if (pathHexes.Length < pathHexes.Length - 1)
-            {
-                test += hex.movementCost + ", ";
-                testInt += hex.movementCost;
-            }
-            else
-            {
-                test += hex.movementCost + ".";
-                testInt += hex.movementCost;
-            }
-            Debug.LogError(test + " Total Movement Cost: " + testInt);
-        }
-
-        MovementRemaining -= testInt;
 
         MouseManagerScript.instance.PathCount(pathHexes.Length);
 
@@ -165,15 +141,23 @@ public class UnitScript : IQPathUnitScript
         //Grab the first hex in our queue
         HexScript newHex = hexPath.Dequeue();
 
+        MovementRemaining -= newHex.movementCost;
 
-        //Move to the new Hex
-        //SetHex(newHex);
-        #region Debuging
-        //HexScript oldHex = Hex;
-        //newHex = oldHex.HexMap.GetHexAt(oldHex.C + 1, oldHex.R);
-        #endregion
+        if (MovementRemaining < 0)
+        {
 
-        SetHex(newHex);
+        }
+        else
+        {
+            //Move to the new Hex
+            //SetHex(newHex);
+            #region Debuging
+            //HexScript oldHex = Hex;
+            //newHex = oldHex.HexMap.GetHexAt(oldHex.C + 1, oldHex.R);
+            #endregion
+
+            SetHex(newHex);
+        }
     }
 
     public void SelfSelectedDoTurn(HexScript[] selectedHexes)

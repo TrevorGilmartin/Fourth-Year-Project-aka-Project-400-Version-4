@@ -435,7 +435,7 @@ public class MouseManagerScript : MonoBehaviour
                                     potentialSelectedHexOriginalColour = potentialHexSelection_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color;
                                     potentialHexSelection_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = Color.blue;
                                     potentialSelectedHexCashe_go = potentialHexSelection_go;
-                                    PotentialEnergyDifference();            
+                                    PotentialEnergyDifference();
                                 }
                                 else
                                 {
@@ -712,7 +712,7 @@ public class MouseManagerScript : MonoBehaviour
                 GameObject tempHex_GoCharacter = GameObject.Find("group2");
                 #endregion
                 Debug.LogError(currentHitModelObject.GetComponentInParent<UnitViewScript>().Name);
-                if (Input.GetMouseButtonDown(0) && hitInfo.collider.transform.parent.name == tempHex_GoCharacter.name.ToString() && currentHitModelObject.GetComponentInParent<UnitViewScript>().Name == "AIAggressivePlumber")
+                if (Input.GetMouseButtonDown(0) && hitInfo.collider.transform.parent.name == tempHex_GoCharacter.name.ToString())
                 {
                     foreach (var aiUnit in MapGeneratorScript.instance.aiUnits)
                     {
@@ -720,7 +720,12 @@ public class MouseManagerScript : MonoBehaviour
                         {
                             if (aiUnit.Hex == hex)
                             {
-                                aiUnit.HitPoints -= 20;
+                                aiUnit.HitPoints -= 1000;
+                            }
+
+                            if (aiUnit.HitPoints <= 0)
+                            {
+                                StateManagerScript.instance.DoSelfDestructionMode(aiUnit);
                             }
                         }
                     }
@@ -773,6 +778,8 @@ public class MouseManagerScript : MonoBehaviour
         CanvasManagerScript._instance.Deactivation();
         canvasActivated = false;
         movementActivated = false;
+
+        selectedUnit.MovementRemaining = selectedUnit.Movement;
 
         #region original code for unselection
         //foreach (var unit in MapGeneratorScript.instance.units)

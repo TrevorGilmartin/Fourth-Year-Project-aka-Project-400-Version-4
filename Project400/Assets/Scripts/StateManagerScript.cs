@@ -73,6 +73,7 @@ public class StateManagerScript : MonoBehaviour
     private bool movementActivated;
     private bool pathBegun;
     public bool aiTurn;
+    private bool noCharacter = false;
     private IEnumerable<object> characterToDestroy;
 
 
@@ -163,11 +164,6 @@ public class StateManagerScript : MonoBehaviour
         {
             DoEndTurn();
         }
-
-        if (currentState == States.SelfDestructionMode)
-        {
-            DoSelfDestructionMode();
-        }
     }
 
     private void DoSelectedAIUnitCharacter()
@@ -187,6 +183,10 @@ public class StateManagerScript : MonoBehaviour
                     }
                 }
             }
+            if (selectedAIUnit == null)
+            {
+                currentState = States.EndTurn;
+            }
         }
         if (currentTurnState == TurnsState.EnemyTurn_2)
         {
@@ -203,6 +203,10 @@ public class StateManagerScript : MonoBehaviour
                     }
                 }
             }
+            if (selectedAIUnit == null)
+            {
+                currentState = States.EndTurn;
+            }
         }
         if (currentTurnState == TurnsState.EnemyTurn_3)
         {
@@ -218,6 +222,10 @@ public class StateManagerScript : MonoBehaviour
                         Debug.LogError(selectedAIUnit.enemyNumber);
                     }
                 }
+            }
+            if (selectedAIUnit == null)
+            {
+                currentState = States.EndTurn;
             }
         }
     }
@@ -284,7 +292,7 @@ public class StateManagerScript : MonoBehaviour
                 HexScript Found = null;
                 foreach (var unit in MapGeneratorScript.instance.aiUnits) //Collection of enemy players
                 {
-                    if (unit.Hex == hex)
+                    if (unit.Hex == hex && unit.Hex != selectedAIUnit.Hex)
                     {
                         Found = unit.Hex;
                         Debug.LogError("The Current: R=" + unit.Hex.R + " C=" + unit.Hex.C);
@@ -293,6 +301,7 @@ public class StateManagerScript : MonoBehaviour
 
                 if (Found == null)
                 {
+                    #region Row And Column Short Distance Algorithm
                     coordinatesX1 = hex.C;
                     coordinatesX2 = selectedPlayerUnit.Hex.C;
 
@@ -319,6 +328,7 @@ public class StateManagerScript : MonoBehaviour
                         shortestSquareResult = squaredResult;
                         selectedHex = hex;
                     }
+                    #endregion
                 }
 
             }
@@ -406,12 +416,15 @@ public class StateManagerScript : MonoBehaviour
 
     private void DoEndTurn()
     {
-        foreach (HexScript hex in hexes)
+        if (hexes != null)
         {
-            GameObject tempHexNeighbour_go = GameObject.Find("Hex_" + hex.C + "_" + hex.R);
-            if (hex.movementCost == 1)
+            foreach (HexScript hex in hexes)
             {
-                tempHexNeighbour_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = selectedHexesOriginalColor;
+                GameObject tempHexNeighbour_go = GameObject.Find("Hex_" + hex.C + "_" + hex.R);
+                if (hex.movementCost == 1)
+                {
+                    tempHexNeighbour_go.transform.gameObject.GetComponentInChildren<MeshRenderer>().material.color = selectedHexesOriginalColor;
+                }
             }
         }
         shortestSquareResult = 0;
@@ -426,6 +439,7 @@ public class StateManagerScript : MonoBehaviour
         movementActivated = false;
         pathBegun = true;
         aiTurn = false;
+        noCharacter = false;
 
         turnNumber++;
 
@@ -453,20 +467,17 @@ public class StateManagerScript : MonoBehaviour
 
     }
 
-    private void DoSelfDestructionMode()
+    public void DoSelfDestructionMode(AIUnitScript aiUnit)
     {
-        List<GameObject> charactersToDestroy = MapGeneratorScript.instance.aiUnitToGameObjectMapList;
-        foreach (GameObject character in characterToDestroy)
+        foreach (GameObject character in MapGeneratorScript.instance.aiUnitToGameObjectMapList)
         {
-            foreach (var aiUnit in MapGeneratorScript.instance.aiUnits)
+            if (character.GetComponent<UnitViewScript>().Number == aiUnit.enemyNumber && aiUnit.HitPoints <= 0)
             {
-                if (aiUnit.enemyNumber == character.GetComponent<UnitViewScript>().Number && aiUnit.HitPoints <= 0)
-                {
-                    Destroy(character);
-                }
+                Destroy(character);
             }
         }
     }
+
 
     public void NewTurn()
     {
@@ -501,3 +512,4 @@ public class StateManagerScript : MonoBehaviour
         endTurnTrue = false;
     }
 }
+
